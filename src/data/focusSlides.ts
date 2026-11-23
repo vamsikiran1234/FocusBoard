@@ -1,0 +1,40 @@
+import { FocusSlide } from '../types';
+
+export const FOCUS_SLIDES: FocusSlide[] = [
+  {
+    id: 1,
+    slideNumber: '01 / 03',
+    badge: 'FOCUS NOTES',
+    title: 'Make today count.',
+    subtitle: 'A little focus goes a long way.',
+    cardBadge: 'NEXT UP',
+    cardTitle: 'Design landing page',
+    cardProgress: 62,
+    mobileGreeting: 'GOOD AFTERNOON',
+    mobileSubtitle: '3 tasks waiting for your attention.',
+  },
+  {
+    id: 2,
+    slideNumber: '02 / 03',
+    badge: 'FOCUS NOTES',
+    title: 'Small steps, big progress.',
+    subtitle: 'Keep your priorities in view.',
+    cardBadge: 'IN PROGRESS',
+    cardTitle: 'Fix navigation',
+    cardProgress: 67,
+    mobileGreeting: 'STAY CONSISTENT',
+    mobileSubtitle: 'Consistent daily effort builds great products.',
+  },
+  {
+    id: 3,
+    slideNumber: '03 / 03',
+    badge: 'FOCUS NOTES',
+    title: 'Celebrate the wins.',
+    subtitle: 'Every completed task moves you forward.',
+    cardBadge: 'COMPLETED',
+    cardTitle: 'Onboarding copy',
+    cardProgress: 100,
+    mobileGreeting: 'CELEBRATE WINS',
+    mobileSubtitle: 'Review your achievements and plan next goals.',
+  },
+];
