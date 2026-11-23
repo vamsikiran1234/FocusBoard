@@ -27,7 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, onOpe
 
   return (
     <aside
-      className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-100 h-screen sticky top-0 overflow-y-auto select-none flex-shrink-0"
+      className="hidden lg:flex flex-col w-64 bg-white border-r border-slate-100 h-screen sticky top-0 overflow-y-auto no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden select-none flex-shrink-0"
       aria-label="Main Navigation"
     >
       {/* Brand Logo Header - Generous top spacing, no bottom line */}
