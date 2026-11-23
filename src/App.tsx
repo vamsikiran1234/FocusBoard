@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TaskProvider, useTasks } from './context/TaskContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -9,16 +9,47 @@ import { TaskList } from './components/TaskList';
 import { TaskModal } from './components/TaskModal';
 import { DeleteModal } from './components/DeleteModal';
 import { Toast } from './components/Toast';
+import { ShortcutsModal } from './components/ShortcutsModal';
 
 const DashboardContent: React.FC = () => {
   const [currentTab, setCurrentTab] = useState('overview');
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+
   const {
     openCreateModal,
     isCreateModalOpen,
     closeCreateModal,
     editingTask,
     closeEditModal,
+    setSlide,
   } = useTasks();
+
+  // Global Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const activeTag = (document.activeElement?.tagName || '').toLowerCase();
+      if (['input', 'textarea', 'select'].includes(activeTag)) {
+        return;
+      }
+
+      if (e.key === '?' || (e.key === '/' && e.shiftKey)) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+      } else if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault();
+        openCreateModal();
+      } else if (e.key === '/') {
+        e.preventDefault();
+        const searchInput = document.querySelector<HTMLInputElement>('input[placeholder*="task"]');
+        searchInput?.focus();
+      } else if (['1', '2', '3'].includes(e.key)) {
+        setSlide(parseInt(e.key, 10) - 1);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [openCreateModal, setSlide]);
 
   const tabTitles: Record<string, string> = {
     overview: 'Overview',
@@ -30,7 +61,11 @@ const DashboardContent: React.FC = () => {
   return (
     <div className="min-h-screen flex bg-[#F8FAFC]">
       {/* Left Sidebar for Desktop */}
-      <Sidebar currentTab={currentTab} onTabChange={setCurrentTab} />
+      <Sidebar
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
+      />
 
       {/* Main Workspace Area */}
       <div className="flex-1 flex flex-col min-w-0">
@@ -87,6 +122,10 @@ const DashboardContent: React.FC = () => {
         taskToEdit={editingTask}
       />
       <DeleteModal />
+      <ShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
       <Toast />
     </div>
   );

@@ -19,6 +19,54 @@ FocusBoard is a responsive, single-user task dashboard built with **React**, **T
 
 ---
 
+## 🏛️ System Architecture & Data Flow
+
+```mermaid
+flowchart TD
+    subgraph UI ["User Interface (Responsive 390px / 768px / 1440px)"]
+        Sidebar["Sidebar & Mobile Bottom Nav"]
+        Carousel["Focus Notes Carousel (3 Slides)"]
+        Stats["Stat Cards (Dynamic Metrics)"]
+        TaskList["Task List (Search, Filter Tabs, Priority)"]
+        Modals["TaskModals, DeleteModal & ShortcutsModal"]
+    end
+
+    subgraph CoreState ["State Management (React Context Single Source of Truth)"]
+        State["Tasks Array (Immutable Reducers)"]
+        Filters["SearchQuery, StatusFilter, PriorityFilter"]
+        ActiveSlide["Active Carousel Slide Index (0, 1, 2)"]
+    end
+
+    subgraph Derived ["Derived Computations (useMemo)"]
+        FilteredTasks["Filtered Tasks Pipeline"]
+        DynamicStats["Total / In-Progress / Completed / Percentage"]
+    end
+
+    subgraph Persistence ["Persistence Layer"]
+        Storage[("Browser localStorage focusboard_tasks_v1")]
+        Export["One-Click JSON Data Export / Seed Restore"]
+    end
+
+    UI -->|User Actions & Keyboard Hotkeys| CoreState
+    CoreState --> Derived
+    Derived --> UI
+    CoreState <-->|Synchronous Bi-directional Sync| Persistence
+```
+
+---
+
+## ⚡ Power-User Keyboard Shortcuts
+
+| Shortcut | Action | Description |
+| :---: | :--- | :--- |
+| <kbd>N</kbd> | **New Task** | Instantly opens the Create Task modal from anywhere |
+| <kbd>/</kbd> | **Focus Search** | Jumps focus directly to the task search input |
+| <kbd>1</kbd>, <kbd>2</kbd>, <kbd>3</kbd> | **Carousel Slide** | Navigates directly to Focus Notes slide 1, 2, or 3 |
+| <kbd>?</kbd> | **Shortcuts Guide** | Opens the interactive Keyboard Shortcuts cheat sheet |
+| <kbd>Esc</kbd> | **Dismiss** | Closes any open modal or dropdown menu |
+
+---
+
 ## ✨ Features & Rubric Compliance
 
 ### 1. Visual & Pixel-Perfect Fidelity (Figma Source of Truth)

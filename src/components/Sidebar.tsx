@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, RotateCcw } from 'lucide-react';
+import { Sparkles, RotateCcw, Download, Keyboard } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
 import { Logo } from './Logo';
 import {
@@ -12,10 +12,11 @@ import {
 interface SidebarProps {
   currentTab: string;
   onTabChange: (tab: string) => void;
+  onOpenShortcuts?: () => void;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange }) => {
-  const { resetToDefaultData, stats } = useTasks();
+export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange, onOpenShortcuts }) => {
+  const { resetToDefaultData, exportTasksAsJSON, stats } = useTasks();
 
   const navItems = [
     { id: 'overview', label: 'Overview', icon: OverviewIcon },
@@ -80,14 +81,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, onTabChange }) => 
             </p>
           </div>
 
-          <button
-            onClick={resetToDefaultData}
-            title="Reset to initial Figma sample tasks"
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Reset sample data</span>
-          </button>
+          <div className="space-y-1">
+            <button
+              onClick={exportTasksAsJSON}
+              title="Export all tasks to a JSON file"
+              className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <Download className="w-3.5 h-3.5 text-slate-400" />
+                <span>Export JSON</span>
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">.json</span>
+            </button>
+
+            {onOpenShortcuts && (
+              <button
+                onClick={onOpenShortcuts}
+                title="Keyboard Shortcuts"
+                className="w-full flex items-center justify-between px-3 py-1.5 text-xs font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+              >
+                <span className="flex items-center gap-2">
+                  <Keyboard className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Shortcuts</span>
+                </span>
+                <kbd className="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-[10px] font-mono text-slate-500">?</kbd>
+              </button>
+            )}
+
+            <button
+              onClick={resetToDefaultData}
+              title="Reset to initial Figma sample tasks"
+              className="w-full flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Reset sample data</span>
+            </button>
+          </div>
         </div>
       </div>
     </aside>

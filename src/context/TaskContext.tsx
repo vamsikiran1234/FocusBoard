@@ -45,6 +45,7 @@ interface TaskContextType {
   toggleTaskStatus: (id: string) => void;
   setTaskStatus: (id: string, status: TaskStatus) => void;
   resetToDefaultData: () => void;
+  exportTasksAsJSON: () => void;
   
   // Modal Controls
   isCreateModalOpen: boolean;
@@ -286,6 +287,22 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast('Reset to original sample data.', 'info');
   }, [showToast]);
 
+  const exportTasksAsJSON = useCallback(() => {
+    try {
+      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(tasks, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute('href', dataStr);
+      downloadAnchor.setAttribute('download', `focusboard_tasks_${new Date().toISOString().slice(0, 10)}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast('Tasks exported to JSON successfully!', 'info');
+    } catch (err) {
+      console.error('Failed to export tasks:', err);
+      showToast('Failed to export tasks.', 'error');
+    }
+  }, [tasks, showToast]);
+
   // Modal handlers
   const openCreateModal = useCallback(() => setIsCreateModalOpen(true), []);
   const closeCreateModal = useCallback(() => setIsCreateModalOpen(false), []);
@@ -323,6 +340,7 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toggleTaskStatus,
     setTaskStatus,
     resetToDefaultData,
+    exportTasksAsJSON,
     isCreateModalOpen,
     openCreateModal,
     closeCreateModal,
