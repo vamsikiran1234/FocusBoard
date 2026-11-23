@@ -1,55 +1,55 @@
-# AI Usage Disclosure (AI_USAGE.md)
+# AI Usage
 
-This document provides a clear and honest overview of AI tool usage during the development of FocusBoard, in accordance with the assessment requirements.
-
----
-
-## 1. Tool Used
-* **Tool:** AI Coding Assistant (Antigravity)
-* **Purpose:** Code acceleration, initial boilerplate generation, and debugging assistance.
+I used an AI coding assistant during this project to speed up initial setup, generate SVG icon coordinates, draft test cases, and help debug layout and event issues. All business logic, Figma alignment, and architectural decisions were reviewed, verified, and adjusted by me.
 
 ---
 
-## 2. Prompts Used
-The prompts below reflect how the assistant was used throughout the project:
+## Tool Used
 
-### Prompt 1: Initial Setup
-> *"Help me set up the initial FocusBoard project structure using React, Vite, TypeScript, and Tailwind CSS matching the Figma dashboard layout."*
-
-### Prompt 2: Design Fidelity & Custom Icons
-> *"Can you help create the custom SVG icons for the FocusBoard logo and sidebar navigation so they match the shapes and colors in the Figma reference?"*
-
-### Prompt 3: Form Validation & Field Checking
-> *"In the Create Task modal, validate that the task title is required, and double-check if the category dropdown is actually present in the Figma modal design."*
-
-### Prompt 4: Debugging Dropdown Interactions
-> *"In desktop view, the Edit task option in the task row menu is not opening the modal when clicked. Can you help me find why the click event is not firing?"*
+- **Tool:** AI Coding Assistant (Antigravity / Gemini)
+- **Role:** Boilerplate generation, SVG drafting, test structure, and debugging help.
 
 ---
 
-## 3. Areas of AI Assistance
-* **Project Scaffolding:** Creating the initial React + TypeScript + Vite project configuration and folder structure.
-* **Icon Geometry:** Helping generate clean SVG coordinates for the custom FocusBoard squircle logo and navigation icons.
-* **Test Case Boilerplate:** Drafting unit test files in Vitest for the task filtering, statistics, and storage persistence.
-* **Code Review & Debugging:** Identifying race conditions in DOM event listeners across responsive layouts.
+## Prompts Used During Development
+
+Here is how I interacted with the assistant across different stages of the project:
+
+### 1. Project Setup & Architecture
+> *"I'm building a task dashboard called FocusBoard using React, TypeScript, and Tailwind CSS. Help me set up the initial folder structure, Context API state management, and basic layout components based on desktop, tablet, and mobile Figma designs."*
+
+### 2. Custom Icons & Logo
+> *"Can you write clean React SVG components for the FocusBoard logo (purple squircle with 4 dots) and the sidebar navigation icons (Overview, Tasks, Calendar, Settings) so they match the Figma reference?"*
+
+### 3. Carousel Component
+> *"I need to build the Focus Notes carousel. It should display 3 slides with next/prev buttons, show subtle tilted peek cards on desktop (+2.5° and -2.5°), and switch to a compact progress bar card on mobile screens."*
+
+### 4. Dropdown Click Debugging
+> *"When I click 'Edit task' in the task row menu on desktop, the modal does not open and the menu simply disappears. Can you help me trace why the click event is not firing?"*
+
+### 5. LocalStorage Edge Cases
+> *"How should I structure the localStorage loading logic so that default sample tasks load on the first visit, but if a user deletes all tasks and refreshes, it doesn't reset back to the default tasks?"*
+
+### 6. Unit & Component Tests
+> *"Can you write Vitest test files to cover task filtering (by search keyword, status tab, and priority), derived task statistics, and localStorage persistence?"*
 
 ---
 
-## 4. Suggestions Checked, Corrected, or Rejected
-Working with AI requires careful review to ensure accuracy. Below are specific instances where AI suggestions were corrected or adjusted:
+## What I Reviewed and Fixed
 
-1. **Fixing the Dropdown Menu Click Bug**:
-   * *Issue:* The initial code used a single `useRef` for both the desktop and mobile dropdown containers. On desktop, clicking "Edit task" caused the document's outside-click listener to mistakenly close the menu before the click event could execute.
-   * *Correction:* Separated the refs into `desktopMenuRef` and `mobileMenuRef`, and added `stopPropagation` on `mousedown` for menu buttons to ensure smooth interaction.
+While the assistant helped accelerate development, I reviewed and tested every generated snippet against the Figma design and assignment criteria, making key corrections:
 
-2. **Removing Unnecessary Category Field in Create Modal**:
-   * *Issue:* The assistant initially generated a "Category" dropdown selector in the task creation form.
-   * *Correction:* Audited the Figma reference (Frame `1:279`) and found that the category field does not exist in the design. Removed the field from the form to keep the modal faithful to Figma, while providing a safe default in state.
+- **Fixed Dropdown Ref Sharing Bug:**
+  The assistant generated a single `ref` shared across both desktop and mobile dropdown containers in `TaskItem.tsx`. In desktop view, clicking "Edit task" triggered the outside-click listener on `mousedown` before the `click` event could fire. I separated them into `desktopMenuRef` and `mobileMenuRef` and added `onMouseDown={(e) => e.stopPropagation()}` so the modal opens reliably.
 
-3. **Preserving Empty Task Lists in LocalStorage**:
-   * *Issue:* The storage logic initially checked `if (parsed.length > 0)`, which caused the application to re-load default sample tasks on refresh if a user deliberately deleted all tasks.
-   * *Correction:* Changed the condition to check if the storage key exists (`stored !== null`), ensuring an empty list remains empty on refresh as required by the assignment guidelines.
+- **Removed Unnecessary Category Field in Modal:**
+  The assistant initially included a category selector dropdown in the task creation modal. After cross-checking Figma Frame `1:279`, I confirmed that the design does not have a category field. I removed the dropdown to keep the modal 100% true to Figma, setting a sensible default in state to satisfy TypeScript.
 
-4. **Avoiding Redundant State Variables**:
-   * *Issue:* The assistant suggested storing task statistics (total, completed, in-progress) as separate state variables updated by counter functions.
-   * *Correction:* Kept the task array as the single source of truth and derived all counts using `useMemo`, preventing counts from becoming out of sync when filtering or searching.
+- **Preserved Empty Task Lists in LocalStorage:**
+  The assistant wrote a check `if (parsed.length > 0)` when reading stored tasks. If a user deleted all tasks, reloading the page saw 0 items and re-seeded the default 12 tasks. I changed the condition to `if (stored !== null && Array.isArray(parsed))` so empty state is respected across page reloads.
+
+- **Derived Stats Instead of Redundant State:**
+  The assistant initially proposed keeping separate `useState` variables for task counts (`totalTasks`, `inProgressTasks`, `completedTasks`) and updating them inside add/delete handlers. I refactored this to use `useMemo` directly on the task array, keeping counts derived and eliminating state synchronization bugs.
+
+- **Mobile Overview Layout Alignment:**
+  The initial layout included all three stat cards on mobile. Cross-checking Frame `1:167` showed that mobile only displays two cards: "Total tasks" and "Completed". I updated the responsive styling to hide the "In progress" card on small screens to match Figma exactly.
