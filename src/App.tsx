@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
 import { TaskProvider, useTasks } from './context/TaskContext';
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
@@ -37,25 +36,29 @@ const DashboardContent: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         <Header currentTabName={tabTitles[currentTab] || 'Overview'} />
 
-        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-28 lg:pb-12">
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8 pb-32 lg:pb-12">
           {/* Top Page Header (Desktop & Mobile) */}
           <div className="flex items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900">
-                Your work, in focus.
+              <h1
+                className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-slate-900 leading-[1.15]"
+                aria-label="Your work, in focus."
+              >
+                <span className="sm:hidden">Your work,<br />in focus.</span>
+                <span className="hidden sm:inline">Your work, in focus.</span>
               </h1>
               <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                Plan your day, stay organized, and celebrate small wins.
+                <span className="sm:hidden">Stay organized and keep moving forward.</span>
+                <span className="hidden sm:inline">Plan your day, stay organized, and celebrate small wins.</span>
               </p>
             </div>
 
-            {/* Desktop New Task Button */}
+            {/* Desktop New Task Button (Exact Figma Spec: 171x46, #6457F5) */}
             <button
               onClick={openCreateModal}
-              className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-98 text-sm font-semibold text-white shadow-md shadow-brand-500/20 transition-all cursor-pointer"
+              className="hidden sm:inline-flex items-center justify-center w-[171px] h-[46px] rounded-2xl bg-[#6457F5] hover:bg-[#5547EB] active:scale-98 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer"
             >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>New task</span>
+              New task
             </button>
           </div>
 

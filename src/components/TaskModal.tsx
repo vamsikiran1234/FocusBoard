@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, Calendar, ChevronDown, AlertCircle } from 'lucide-react';
 import { useTasks } from '../context/TaskContext';
-import { Task, TaskCategory, TaskPriority, TaskStatus } from '../types';
+import { Task, TaskPriority, TaskStatus } from '../types';
 import { getTodayDateString } from '../utils/dateUtils';
 
 interface TaskModalProps {
@@ -19,10 +19,9 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<TaskCategory>('Design');
   const [status, setStatus] = useState<TaskStatus>('to-do');
   const [priority, setPriority] = useState<TaskPriority>('medium');
-  const [dueDate, setDueDate] = useState(getTodayDateString());
+  const [dueDate, setDueDate] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -33,24 +32,22 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       if (taskToEdit) {
         setTitle(taskToEdit.title);
         setDescription(taskToEdit.description || '');
-        setCategory(taskToEdit.category);
         setStatus(taskToEdit.status);
         setPriority(taskToEdit.priority);
-        setDueDate(taskToEdit.dueDate || getTodayDateString());
+        setDueDate(taskToEdit.dueDate || '');
       } else {
         setTitle('');
         setDescription('');
-        setCategory('Design');
         setStatus('to-do');
         setPriority('medium');
-        setDueDate(getTodayDateString());
+        setDueDate('');
       }
       setError(null);
 
-      // Focus input on open
+      // Auto-focus input on modal open
       setTimeout(() => {
         titleInputRef.current?.focus();
-      }, 50);
+      }, 60);
     }
   }, [isOpen, taskToEdit]);
 
@@ -76,24 +73,25 @@ export const TaskModal: React.FC<TaskModalProps> = ({
       return;
     }
 
+    const finalDueDate = dueDate.trim() || getTodayDateString();
+
     if (taskToEdit) {
       updateTask(taskToEdit.id, {
         title: title.trim(),
         description: description.trim(),
-        category,
         status,
         priority,
-        dueDate,
+        dueDate: finalDueDate,
       });
     } else {
       addTask({
         title: title.trim(),
         description: description.trim(),
-        category,
+        category: 'Design',
         status,
         priority,
-        dueDate,
-        projectSubtitle: `${category} • Priority ${priority}`,
+        dueDate: finalDueDate,
+        projectSubtitle: `Due soon`,
       });
     }
 
@@ -102,18 +100,19 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-xs animate-in fade-in duration-200"
       role="dialog"
       aria-modal="true"
       aria-labelledby="task-modal-title"
+      onClick={onClose}
     >
-      {/* Modal Dialog (Max width ~640px to 760px matching Figma 760x822) */}
+      {/* Modal Dialog matching Figma 760 x 822 */}
       <div
-        className="bg-white rounded-3xl w-full max-w-[640px] shadow-2xl border border-slate-100 overflow-hidden transform animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+        className="bg-white rounded-3xl w-full max-w-[660px] shadow-2xl border border-slate-100 overflow-hidden transform animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 sm:px-8 pt-7 pb-5 flex items-start justify-between border-b border-slate-100">
+        <div className="px-6 sm:px-9 pt-7 pb-5 flex items-start justify-between border-b border-slate-100">
           <div>
             <h2
               id="task-modal-title"
@@ -130,16 +129,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+            className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="px-6 sm:px-8 py-6 space-y-5 overflow-y-auto">
-          {/* Task Title */}
+        {/* Form Body - Exactly matches Figma Frame 1:279 */}
+        <form onSubmit={handleSubmit} className="px-6 sm:px-9 py-6 space-y-5 overflow-y-auto">
+          {/* Task Title * */}
           <div>
             <label
               htmlFor="task-title"
@@ -186,7 +185,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </label>
             <textarea
               id="task-desc"
-              rows={3}
+              rows={4}
               placeholder="Add notes about this task..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -194,7 +193,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             />
           </div>
 
-          {/* Status & Priority Row */}
+          {/* Status & Priority Row (2 Columns) */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Status */}
             <div>
@@ -243,69 +242,52 @@ export const TaskModal: React.FC<TaskModalProps> = ({
             </div>
           </div>
 
-          {/* Category & Due Date Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Category */}
-            <div>
-              <label
-                htmlFor="task-category"
-                className="block text-xs sm:text-sm font-bold text-slate-800 mb-2"
-              >
-                Category
-              </label>
-              <div className="relative">
-                <select
-                  id="task-category"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value as TaskCategory)}
-                  className="w-full appearance-none px-4 py-3 bg-white border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl text-sm font-medium text-slate-800 cursor-pointer outline-none transition-all"
-                >
-                  <option value="Design">Design</option>
-                  <option value="Development">Development</option>
-                  <option value="Content">Content</option>
-                  <option value="Research">Research</option>
-                  <option value="Marketing">Marketing</option>
-                  <option value="Operations">Operations</option>
-                </select>
-                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-            </div>
-
-            {/* Due date */}
-            <div>
-              <label
-                htmlFor="task-due-date"
-                className="block text-xs sm:text-sm font-bold text-slate-800 mb-2"
-              >
-                Due date
-              </label>
-              <div className="relative">
-                <Calendar className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  id="task-due-date"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl text-sm font-medium text-slate-800 cursor-pointer outline-none transition-all"
-                />
-              </div>
+          {/* Due date with placeholder DD / MM / YYYY and no right-side browser icon */}
+          <div>
+            <label
+              htmlFor="task-due-date"
+              className="block text-xs sm:text-sm font-bold text-slate-800 mb-2"
+            >
+              Due date
+            </label>
+            <div className="relative">
+              <Calendar className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                id="task-due-date"
+                type={dueDate ? 'date' : 'text'}
+                placeholder="DD / MM / YYYY"
+                value={dueDate}
+                onFocus={(e) => {
+                  e.target.type = 'date';
+                  try {
+                    e.target.showPicker?.();
+                  } catch {}
+                }}
+                onBlur={(e) => {
+                  if (!e.target.value) {
+                    e.target.type = 'text';
+                  }
+                }}
+                onChange={(e) => setDueDate(e.target.value)}
+                className="w-full pl-11 pr-4 py-3 bg-white border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 rounded-xl text-sm font-medium text-slate-800 placeholder:text-slate-400 outline-none transition-all cursor-pointer"
+              />
             </div>
           </div>
 
           <p className="text-xs text-slate-400 pt-1">* Required field</p>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+          {/* Action Buttons with subtle top border */}
+          <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-100">
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+              className="px-6 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-98 text-sm font-semibold text-white shadow-md shadow-brand-500/20 transition-all"
+              className="px-7 py-2.5 rounded-xl bg-[#6457F5] hover:bg-[#5547EB] active:scale-98 text-sm font-semibold text-white shadow-sm transition-all cursor-pointer"
             >
               {taskToEdit ? 'Save changes' : 'Create task'}
             </button>

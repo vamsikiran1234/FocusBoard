@@ -10,6 +10,7 @@ import { INITIAL_TASKS } from '../data/initialTasks';
 import { FOCUS_SLIDES } from '../data/focusSlides';
 
 const STORAGE_KEY = 'focusboard_tasks_v1';
+const ALT_STORAGE_KEY = 'focusboard_tasks';
 
 export interface ToastNotification {
   id: string;
@@ -68,16 +69,20 @@ interface TaskContextType {
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // 1. LocalStorage Initialization with Safe Fallback
+  // 1. LocalStorage Initialization with Safe Fallback & Eager Seeding
   const [tasks, setTasks] = useState<Task[]>(() => {
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
+      const stored = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(ALT_STORAGE_KEY) || localStorage.getItem('tasks');
+      if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           return parsed;
         }
       }
+      // Eagerly seed initial tasks into localStorage so DevTools shows data immediately
+      const initialJson = JSON.stringify(INITIAL_TASKS);
+      localStorage.setItem(STORAGE_KEY, initialJson);
+      localStorage.setItem(ALT_STORAGE_KEY, initialJson);
     } catch (err) {
       console.warn('Failed to load tasks from localStorage:', err);
     }
@@ -87,7 +92,9 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // 2. Persist to LocalStorage on updates
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      const json = JSON.stringify(tasks);
+      localStorage.setItem(STORAGE_KEY, json);
+      localStorage.setItem(ALT_STORAGE_KEY, json);
     } catch (err) {
       console.error('Failed to save tasks to localStorage:', err);
     }
@@ -270,8 +277,12 @@ export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 
   const resetToDefaultData = useCallback(() => {
+    const data = JSON.stringify(INITIAL_TASKS);
     setTasks(INITIAL_TASKS);
-    localStorage.removeItem(STORAGE_KEY);
+    try {
+      localStorage.setItem(STORAGE_KEY, data);
+      localStorage.setItem(ALT_STORAGE_KEY, data);
+    } catch {}
     showToast('Reset to original sample data.', 'info');
   }, [showToast]);
 

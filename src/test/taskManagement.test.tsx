@@ -11,7 +11,7 @@ describe('FocusBoard Full Application End-to-End Interactions', () => {
     render(<App />);
 
     expect(screen.getByText('Your work, in focus.')).toBeInTheDocument();
-    expect(screen.getByText('Total tasks')).toBeInTheDocument();
+    expect(screen.getAllByText('Total tasks').length).toBeGreaterThan(0);
     expect(screen.getAllByText('In progress').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Completed').length).toBeGreaterThan(0);
   });
@@ -83,5 +83,29 @@ describe('FocusBoard Full Application End-to-End Interactions', () => {
 
     expect(screen.getAllByText('Fix mobile navigation').length).toBeGreaterThan(0);
     expect(screen.queryByText('Review onboarding copy')).not.toBeInTheDocument();
+  });
+
+  it('opens edit task modal and updates the task title', async () => {
+    render(<App />);
+
+    const moreButtons = screen.getAllByLabelText('More task actions');
+    fireEvent.click(moreButtons[0]);
+
+    const editButtons = screen.getAllByText('Edit task');
+    fireEvent.click(editButtons[0]);
+
+    // Verify Edit Task modal opened
+    expect(screen.getByText('Edit task')).toBeInTheDocument();
+    expect(screen.getByText('Update your task details and progress.')).toBeInTheDocument();
+
+    const titleInput = screen.getByDisplayValue('Design landing page');
+    fireEvent.change(titleInput, { target: { value: 'Design landing page v2' } });
+
+    const saveBtn = screen.getByRole('button', { name: /save changes/i });
+    fireEvent.click(saveBtn);
+
+    await waitFor(() => {
+      expect(screen.getAllByText('Design landing page v2').length).toBeGreaterThan(0);
+    });
   });
 });
